@@ -1,32 +1,22 @@
 <template>
   <div id="app">
-    <div class="container">
-      <GameBoard/>
-    </div>
+    <game @new-game="newGame" />
   </div>
 </template>
 
 <script>
-
-import GameBoard from "@/components/GameBoard.vue";
+import Game from "@/components/Game.vue";
 
 export default {
-  name: "app",
   components: {
-    GameBoard
-  }
+    Game,
+  },
 };
 </script>
 
 <style>
-* {
-  box-sizing: border-box;
-  font-family: "Arial";
-  font-weight: bold;
-}
-
-.container {
-  margin: 30px auto;
-  width: 1200px;
+#app {
+  text-align: center;
+  padding: 20px;
 }
 </style>
