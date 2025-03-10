@@ -2,7 +2,20 @@
   <div class="game">
     <game-menu :score="score" @newGame="init" />
     <div class="board">
-      <tiles :cells="cells" />
+      <div
+          v-for="(row, rowIndex) in rows"
+          :key="rowIndex"
+          class="row"
+      >
+        <span
+            v-for="(cell, colIndex) in row"
+            :key="colIndex"
+            class="cell"
+            :style="{ backgroundColor: getTileColor(cell) }"
+        >
+          {{ cell > 0 ? cell : '' }}
+        </span>
+      </div>
     </div>
     <div class="buttons">
       <button class="btn" @click="move('ArrowUp')">&#8593;</button>
@@ -17,13 +30,11 @@
 
 <script>
 import GameMenu from './GameMenu.vue';
-import Tile from './Tile.vue';
 
 export default {
   name: 'Game',
   components: {
     GameMenu,
-    Tile,
   },
   data() {
     return {
@@ -31,12 +42,22 @@ export default {
       score: 0,
     };
   },
+  computed: {
+    rows() {
+      return [
+        this.cells.slice(0, 4),
+        this.cells.slice(4, 8),
+        this.cells.slice(8, 12),
+        this.cells.slice(12, 16),
+      ];
+    },
+  },
   methods: {
     init() {
       this.cells = this.shuffle([...Array(16).fill(0)]);
       this.addCells();
       this.addCells();
-      console.log("Initial cells:", this.cells); // Вывод массива в консоль
+      console.log("Initial cells:", this.cells);
     },
     shuffle(arr) {
       for (let i = arr.length - 1; i > 0; i--) {
@@ -49,11 +70,11 @@ export default {
       let emptyCells = this.cells.map((value, index) => value === 0 ? index : -1).filter(index => index !== -1);
       if (emptyCells.length > 0) {
         let index = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-        this.cells[index] = 2; // Добавляем новую плитку
+        this.cells[index] = 2;
       } else if (!this.checkForMoves()) {
         alert("Game Over!");
       }
-      console.log("After adding cells:", this.cells); // Вывод массива после добавления ячеек
+      console.log("After adding cells:", this.cells);
     },
     checkForMoves() {
       for (let i = 0; i < 16; i++) {
@@ -71,7 +92,7 @@ export default {
       if (moved) {
         this.addCells();
       }
-      console.log("Cells after move:", this.cells); // Вывод массива после движения
+      console.log("Cells after move:", this.cells);
     },
     moveArrowLeft(k) {
       let moved = false;
@@ -149,6 +170,23 @@ export default {
       }
       return moved;
     },
+    getTileColor(value) {
+      const colors = {
+        0: '#ccc0b3',
+        2: '#eee4da',
+        4: '#ede0c8',
+        8: '#f2b179',
+        16: '#f59563',
+        32: '#f67c5f',
+        64: '#edcf72',
+        128: '#edcc61',
+        256: '#edc650',
+        512: '#edc53f',
+        1024: '#edc52f',
+        2048: '#edc529',
+      };
+      return colors[value] || '#3c3a32'; // Цвет по умолчанию
+    },
   },
   created() {
     this.init(); // Инициализация игры
@@ -165,11 +203,27 @@ export default {
 
 .board {
   display: flex;
-  flex-wrap: wrap;
-  width: 600px;
-  height: 600px;
+  flex-direction: column;
   background-color: #d0d6da;
   border-radius: 8px;
+  margin: 20px 0;
+}
+
+.row {
+  display: flex;
+}
+
+.cell {
+  width: 140px; /* ширина плитки */
+  height: 140px; /* высота плитки */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 34px;
+  margin: 5px;
+  border-radius: 5px;
+  color: #fff;
+  font-weight: bold;
 }
 
 .buttons {
