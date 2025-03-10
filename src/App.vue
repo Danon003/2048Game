@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <game @new-game="newGame" />
+    <game />
   </div>
 </template>
 
@@ -8,9 +8,7 @@
 import Game from "@/components/Game.vue";
 
 export default {
-  components: {
-    Game,
-  },
+  components: { Game },
 };
 </script>
 

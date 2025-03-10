@@ -15,20 +15,20 @@ export default {
   computed: {
     getTileColor() {
       const colors = {
-        0: '#ccc0b3',
+        0: '#cec0b3',
         2: '#eee4da',
-        4: '#ede0c8',
-        8: '#f2b179',
-        16: '#f59563',
-        32: '#f67c5f',
-        64: '#edcf72',
-        128: '#edcc61',
-        256: '#edc650',
+        4: '#ece0ca',
+        8: '#f3b07a',
+        16: '#f59462',
+        32: '#f57b5f',
+        64: '#f55d3b',
+        128: '#eccd71',
+        256: '#eccb61',
         512: '#edc53f',
         1024: '#edc52f',
-        2048: '#edc529',
+        2048: '#edc12e',
       };
-      return colors[this.tile] || '#3c3a32'; // Цвет по умолчанию
+      return colors[this.tile] || '#3c3a32';
     },
   },
 };
@@ -36,15 +36,15 @@ export default {
 
 <style>
 .cell {
-  width: 140px; /* ширина плитки */
-  height: 140px; /* высота плитки */
+  width: 140px;
+  height: 140px;
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 34px;
   margin: 5px;
   border-radius: 5px;
-  color: #fff;
+  color: #3f3b3b;
   font-weight: bold;
 }
 </style>
