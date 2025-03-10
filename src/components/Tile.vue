@@ -1,14 +1,14 @@
 <template>
-  <div class="tile" :style="{ backgroundColor: getTileColor }">
-    {{ tile.value > 0 ? tile.value : '' }}
-  </div>
+  <span class="cell" :style="{ backgroundColor: getTileColor }">
+    {{ tile > 0 ? tile : '' }}
+  </span>
 </template>
 
 <script>
 export default {
   props: {
     tile: {
-      type: Object,
+      type: Number,
       required: true,
     },
   },
@@ -28,16 +28,16 @@ export default {
         1024: '#edc52f',
         2048: '#edc529',
       };
-      return colors[this.tile.value] || '#3c3a32'; // Цвет по умолчанию
+      return colors[this.tile] || '#3c3a32'; // Цвет по умолчанию
     },
   },
 };
 </script>
 
 <style>
-.tile {
-  width: 90px; /* ширина плитки */
-  height: 90px; /* высота плитки */
+.cell {
+  width: 140px; /* ширина плитки */
+  height: 140px; /* высота плитки */
   display: flex;
   justify-content: center;
   align-items: center;

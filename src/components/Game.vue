@@ -1,45 +1,52 @@
 <template>
   <div class="game">
-    <game-menu :score="score" @newGame="init" />
+    <div class="header">
+      <div style="display: flex;
+              justify-content: space-between;
+              margin: 0 auto;
+              max-width: 600px;
+              align-items: center;
+              gap: 80px;">
+        <h1 class="game-title">2048</h1>
+        <div class="score-box">
+          <span class="score-label">Счет:</span>
+          <span class="score-value">{{ score }}</span>
+        </div>
+        <button class="new-game-btn" @click="init">Новая игра</button>
+      </div>
+    </div>
     <div class="board">
       <div
           v-for="(row, rowIndex) in rows"
           :key="rowIndex"
           class="row"
       >
-        <span
+        <tile
             v-for="(cell, colIndex) in row"
             :key="colIndex"
-            class="cell"
-            :style="{ backgroundColor: getTileColor(cell) }"
-        >
-          {{ cell > 0 ? cell : '' }}
-        </span>
+            :tile="cell"
+        />
       </div>
-    </div>
-    <div class="buttons">
-      <button class="btn" @click="move('ArrowUp')">&#8593;</button>
-      <div class="horizontal-buttons">
-        <button class="btn" @click="move('ArrowLeft')">&#8592;</button>
-        <button class="btn" @click="move('ArrowRight')">&#8594;</button>
-      </div>
-      <button class="btn" @click="move('ArrowDown')">&#8595;</button>
+      <div v-if="gameOver" class="game-over">End Game</div>
+      <div v-if="victory" class="victory">Victory</div>
     </div>
   </div>
 </template>
 
 <script>
-import GameMenu from './GameMenu.vue';
+import Tile from './Tile.vue';
 
 export default {
   name: 'Game',
   components: {
-    GameMenu,
+    Tile,
   },
   data() {
     return {
       cells: [],
       score: 0,
+      gameOver: false,
+      victory: false,
     };
   },
   computed: {
@@ -57,6 +64,9 @@ export default {
       this.cells = this.shuffle([...Array(16).fill(0)]);
       this.addCells();
       this.addCells();
+      this.gameOver = false;
+      this.victory = false;
+      this.score = 0;
       console.log("Initial cells:", this.cells);
     },
     shuffle(arr) {
@@ -71,8 +81,9 @@ export default {
       if (emptyCells.length > 0) {
         let index = emptyCells[Math.floor(Math.random() * emptyCells.length)];
         this.cells[index] = 2;
-      } else if (!this.checkForMoves()) {
-        alert("Game Over!");
+      }
+      if (!this.checkForMoves()) {
+        this.gameOver = true; // Игра окончена
       }
       console.log("After adding cells:", this.cells);
     },
@@ -102,6 +113,9 @@ export default {
           if (this.cells[prevIndex] === this.cells[i]) {
             this.cells[prevIndex] += this.cells[i];
             this.score += this.cells[prevIndex];
+            if (this.cells[prevIndex] === 2048) {
+              this.victory = true; // Показать Victory
+            }
             this.cells[i] = 0;
             moved = true;
           } else if (this.cells[prevIndex] === 0) {
@@ -121,6 +135,9 @@ export default {
           if (this.cells[nextIndex] === this.cells[i]) {
             this.cells[nextIndex] += this.cells[i];
             this.score += this.cells[nextIndex];
+            if (this.cells[nextIndex] === 2048) {
+              this.victory = true; // Показать Victory
+            }
             this.cells[i] = 0;
             moved = true;
           } else if (this.cells[nextIndex] === 0) {
@@ -140,6 +157,9 @@ export default {
           if (this.cells[prevIndex] === this.cells[i]) {
             this.cells[prevIndex] += this.cells[i];
             this.score += this.cells[prevIndex];
+            if (this.cells[prevIndex] === 2048) {
+              this.victory = true; // Показать Victory
+            }
             this.cells[i] = 0;
             moved = true;
           } else if (this.cells[prevIndex] === 0) {
@@ -159,6 +179,9 @@ export default {
           if (this.cells[nextIndex] === this.cells[i]) {
             this.cells[nextIndex] += this.cells[i];
             this.score += this.cells[nextIndex];
+            if (this.cells[nextIndex] === 2048) {
+              this.victory = true; // Показать Victory
+            }
             this.cells[i] = 0;
             moved = true;
           } else if (this.cells[nextIndex] === 0) {
@@ -170,26 +193,34 @@ export default {
       }
       return moved;
     },
-    getTileColor(value) {
-      const colors = {
-        0: '#ccc0b3',
-        2: '#eee4da',
-        4: '#ede0c8',
-        8: '#f2b179',
-        16: '#f59563',
-        32: '#f67c5f',
-        64: '#edcf72',
-        128: '#edcc61',
-        256: '#edc650',
-        512: '#edc53f',
-        1024: '#edc52f',
-        2048: '#edc529',
-      };
-      return colors[value] || '#3c3a32'; // Цвет по умолчанию
+    handleKeyDown(event) {
+      // Предотвращает прокрутку страницы при нажатии стрелок
+      if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+        event.preventDefault();
+      }
+
+      switch (event.key) {
+        case 'ArrowUp':
+          this.move('ArrowUp');
+          break;
+        case 'ArrowDown':
+          this.move('ArrowDown');
+          break;
+        case 'ArrowLeft':
+          this.move('ArrowLeft');
+          break;
+        case 'ArrowRight':
+          this.move('ArrowRight');
+          break;
+      }
     },
   },
   created() {
     this.init(); // Инициализация игры
+    document.addEventListener('keydown', this.handleKeyDown);
+  },
+  beforeDestroy() {
+    document.removeEventListener('keydown', this.handleKeyDown);
   },
 };
 </script>
@@ -199,6 +230,21 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow: hidden; /* Убираем прокрутку */
+  height: 100vh; /* Ограничиваем высоту */
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%; /* занимает всю ширину */
+  margin-bottom: 20px;
+}
+
+.game-title {
+  color: #bb8213;
+  font-weight: bold;
+  margin-left: 0; /* Отступ слева для названия игры */
 }
 
 .board {
@@ -207,50 +253,65 @@ export default {
   background-color: #d0d6da;
   border-radius: 8px;
   margin: 20px 0;
+  position: relative; /* Для позиционирования текста Game Over и Victory */
 }
 
 .row {
   display: flex;
 }
 
-.cell {
-  width: 140px; /* ширина плитки */
-  height: 140px; /* высота плитки */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 34px;
-  margin: 5px;
+.new-game-btn {
+  width: 100px;
+  height: 50px;
+  background: indianred;
   border-radius: 5px;
-  color: #fff;
-  font-weight: bold;
-}
-
-.buttons {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.horizontal-buttons {
-  display: flex;
-  justify-content: center;
-}
-
-.btn {
-  width: 80px;
-  height: 80px;
-  font-size: 36px;
-  color: white;
-  background-color: #3498db; /* Цвет кнопки */
   border: none;
+  color: white;
   cursor: pointer;
-  border-radius: 5px;
-  margin: 5px;
-  transition: background-color 0.3s;
+  font-size: 16px;
+  margin: 14px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Лёгкая тень */
+  transition: transform 0.1s ease, box-shadow 0.1s ease; /* Плавный переход */
 }
 
-.btn:hover {
-  background-color: #2980b9; /* Цвет кнопки при наведении */
+.new-game-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.game-over, .victory {
+  position: absolute;
+  top: 50%; /* По центру по вертикали */
+  left: 50%; /* По центру по горизонтали */
+  transform: translate(-50%, -50%); /* Нормализуем позицию */
+  font-size: 36px;
+  font-weight: bold;
+  color: red;
+  text-align: center;
+}
+.victory {
+  color: green;
+}
+.score-box {
+  display: flex;
+  flex-direction: column; /* Стекаем их вертикально */
+  align-items: center; /* Выравниваем по центру */
+  justify-content: center; /* Центрируем содержимое */
+  width: 100px; /* Фиксированная ширина */
+  height: 50px; /* Фиксированная высота */
+  background-color: #f3bb4c; /* Цвет фона */
+  border-radius: 7px;
+  padding: 10px; /* Внутренние отступы */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Лёгкая тень */
+}
+
+.score-label {
+  font-size: 17px;
+  margin-bottom: 5px;
+}
+
+.score-value {
+  font-size: 20px;
+  font-weight: bold;
 }
 </style>
